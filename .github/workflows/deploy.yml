@@ -36,3 +36,19 @@ jobs:
           echo ${{ secrets.REGISTRY_PASSWORD }} | docker login ${{ secrets.REGISTRY_SERVER }} --username ${{ secrets.REGISTRY_USER }} --password-stdin
           docker build . --file Dockerfile --tag $IMAGE_URL
           docker push $IMAGE_URL
+
+      - name: setup cooburnetties
+        run: |
+          curl -L https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+          helm version
+          mkdir ~/.kube/ || echo "create kubeconfig"
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+          curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl
+          chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+          kubectl get ns
+          helm version
+
+      - name: Release it!
+        run: |
+          helm upgrade spring ./helm -f config/dev.yaml -n spring --set image.tag=$GITHUB_SHA

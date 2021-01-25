@@ -1,12 +1,22 @@
 REGISTRY_NAME=eus1devaksregistry
 REGISTRY_URL=$(REGISTRY_NAME).azurecr.io
 IMAGE_NAME := $(shell basename $$(pwd))
-GIT_HASH := $(shell git rev-parse --short HEAD)
+GIT_HASH := $(shell git rev-parse HEAD)
 IMAGE_TAG := $(GIT_HASH)
 DOCKER_FULL_TAG=$(REGISTRY_URL)/$(IMAGE_NAME):$(IMAGE_TAG)
 DOCKER_FULL_TAG := $(shell echo $(DOCKER_FULL_TAG) | awk '{ print tolower($$0) }')
 
+HELM_NAMESPACE=spring
+
 all: push
+
+acr_login_ad_user:
+	@echo logging into ACR with user account through Azure CLI
+	az acr login --name $(REGISTRY_NAME)
+
+acr_login_admin_user:
+	@echo logging into ACR with admin user account
+	az acr login --name $(REGISTRY_NAME)
 
 acr_login_ad_user:
 	@echo logging into ACR with user account through Azure CLI
@@ -25,3 +35,9 @@ push: acr_login_ad_user build
 	@echo Pushing $(DOCKER_FULL_TAG)
 	docker push $(DOCKER_FULL_TAG)
 	@echo Image $(IMAGE_NAME) has new tag $(IMAGE_TAG)
+
+deploy: push
+	@echo weewoooweewooo
+	helm upgrade spring ./helm \
+		-f config/dev.yaml -n spring \
+		--set image.tag=$(IMAGE_TAG)
