@@ -1,0 +1,7 @@
+
+imagePullSecrets:
+- name: eus1devaksregistry-secret
+
+image:
+  repository: eus1devaksregistry.azurecr.io/docker-hello-world-spring-boot
+  tag: b514bc3
