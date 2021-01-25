@@ -36,15 +36,3 @@ jobs:
           echo ${{ secrets.REGISTRY_PASSWORD }} | docker login ${{ secrets.REGISTRY_SERVER }} --username ${{ secrets.REGISTRY_USER }} --password-stdin
           docker build . --file Dockerfile --tag $IMAGE_URL
           docker push $IMAGE_URL
-
-      - name: Tag New Release
-        run: |
-         ls -la 
-         echo " version is $(cat VERSION)"
-         git config --global user.email "opensource@rhythmictech.com"
-         git config --global user.name "bot"
-         git add --all;
-         git commit -m "release $(cat VERSION)" ;
-         git tag -fa v$(cat VERSION) -m "Release version $(cat VERSION)";
-         git show-ref
-         git push origin v$(cat VERSION);
